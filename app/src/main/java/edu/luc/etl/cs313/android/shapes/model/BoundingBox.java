@@ -1,5 +1,7 @@
 package edu.luc.etl.cs313.android.shapes.model;
 
+import java.util.List;
+
 /**
  * A shape visitor for calculating the bounding box, that is, the smallest
  * rectangle containing the shape. The resulting bounding box is returned as a
@@ -17,38 +19,78 @@ public class BoundingBox implements Visitor<Location> {
 
     @Override
     public Location onFill(final Fill f) {
-        return null;
+        return f.getShape().accept(this);
     }
 
     @Override
     public Location onGroup(final Group g) {
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int maxY = Integer.MIN_VALUE;
 
-        return null;
+        for (Shape shape : g.getShapes()) {
+            Location l = shape.accept(this);
+            minX = Math.min(minX, l.getX());
+            minY = Math.min(minY, l.getY());
+            maxX = Math.max(maxX, l.getX() + l.getShape().accept(new BoundingBox()).getX());
+            maxY = Math.max(maxY, l.getY() + l.getShape().accept(new BoundingBox()).getY());
+        }
+        return new Location(minX, minY, new Rectangle(maxX - minX, maxY - minY));
     }
 
     @Override
     public Location onLocation(final Location l) {
-
-        return null;
+        Location l2 = l.getShape().accept(this);
+        return new Location(l.getX() + l2.getX(), l.getY() + l2.getY(), l2.getShape());
     }
 
     @Override
     public Location onRectangle(final Rectangle r) {
-        return null;
+
+        return new Location(0, 0, r);
     }
 
     @Override
     public Location onStrokeColor(final StrokeColor c) {
-        return null;
+
+        return c.getShape().accept(this);
     }
 
     @Override
     public Location onOutline(final Outline o) {
-        return null;
+        return o.getShape().accept(this);
     }
 
     @Override
     public Location onPolygon(final Polygon s) {
-        return null;
+
+        List<? extends Point> points = s.getPoints(); // Get the points of the polygon
+
+        if (points.isEmpty()) {
+            return new Location(0, 0, new Rectangle(0, 0)); // Return a zero-sized rectangle if no points
+        }
+
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int maxY = Integer.MIN_VALUE;
+
+        for (Point point : points) {
+            // Assuming Point class has methods to get x and y
+            int x = point.getX();
+            int y = point.getY();
+
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+
+        // Calculate width and height of the bounding box
+        int width = maxX - minX;
+        int height = maxY - minY;
+
+        return new Location(minX, minY, new Rectangle(width, height));
     }
 }

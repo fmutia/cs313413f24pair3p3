@@ -65,10 +65,10 @@ public class BoundingBox implements Visitor<Location> {
     @Override
     public Location onPolygon(final Polygon s) {
 
-        List<? extends Point> points = s.getPoints(); // Get the points of the polygon
+        List<? extends Point> points = s.getPoints();
 
         if (points.isEmpty()) {
-            return new Location(0, 0, new Rectangle(0, 0)); // Return a zero-sized rectangle if no points
+            return new Location(0, 0, new Rectangle(0, 0));
         }
 
         int minX = Integer.MAX_VALUE;
@@ -77,7 +77,6 @@ public class BoundingBox implements Visitor<Location> {
         int maxY = Integer.MIN_VALUE;
 
         for (Point point : points) {
-            // Assuming Point class has methods to get x and y
             int x = point.getX();
             int y = point.getY();
 
@@ -87,7 +86,6 @@ public class BoundingBox implements Visitor<Location> {
             if (y > maxY) maxY = y;
         }
 
-        // Calculate width and height of the bounding box
         int width = maxX - minX;
         int height = maxY - minY;
 

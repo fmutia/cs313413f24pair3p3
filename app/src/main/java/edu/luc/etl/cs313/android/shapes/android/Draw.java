@@ -3,6 +3,7 @@ package edu.luc.etl.cs313.android.shapes.android;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import java.util.List;
 import edu.luc.etl.cs313.android.shapes.model.*;
 
 /**
@@ -83,15 +84,30 @@ public class Draw implements Visitor<Void> {
 
     @Override
     public Void onPolygon(final Polygon s) {
-        final float[] pts = new float[s.getPoints().size() * 2];
-        int i = 0;
+        List<? extends Point> points = s.getPoints();
 
-        for (Point p: s.getPoints()) {
-            pts[i++] = p.getX();
-            pts[i++] = p.getY();
+        if (points.size() > 1) {
+            float[] pts = new float[(points.size() - 1) * 4];
+            int i = 0;
+            for (int j = 0; j < points.size() - 1; j++) {
+                Point p1 = points.get(j);
+                Point p2 = points.get(j + 1);
+
+                pts[i++] = p1.getX();
+                pts[i++] = p1.getY();
+                pts[i++] = p2.getX();
+                pts[i++] = p2.getY();
+            }
+
+
+            canvas.drawLines(pts, paint);
+
+
+            Point first = points.get(0);
+            Point last = points.get(points.size() - 1);
+            canvas.drawLine(last.getX(), last.getY(), first.getX(), first.getY(), paint);
         }
 
-        canvas.drawLines(pts, paint);
         return null;
     }
 }
